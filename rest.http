@@ -1,0 +1,54 @@
+###
+
+GET http://localhost:4000/api/users
+
+###
+GET http://localhost:4000/api/categories
+
+###
+GET http://localhost:4000/api/lessons
+
+###
+GET http://localhost:4000/api/localizations
+
+
+###
+POST http://localhost:4000/api/lesson
+
+Content-Type: application/json
+
+{
+    "title": "tesgtdfdf",
+    "offer": "testgfdfsf",
+    "instead": "pafgssworfdsfd",
+    "tag": "emaifgfdsfl"
+}
+
+
+###
+DELETE  http://localhost:4000/api/user/1
+
+###
+PATCH  http://localhost:4000/api/user/4
+
+Content-Type: application/json
+
+{
+   "firstName": "tesgtdfdf",
+    "lastName": "testgfdfsf",
+    "password": "pafgssworfdsfd",
+    "email": "emaifgfdsfl",
+    "avatar": "avgfadsftar.jpg" 
+}
+
+###
+POST http://localhost:4000/api/category
+
+Content-Type: application/json
+
+{
+    "name": "new",
+    
+}
+
+

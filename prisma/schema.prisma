@@ -1,0 +1,70 @@
+// This is Prisma schema LearningApp by it...//
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  firstName String
+  lastName String
+  password String 
+  email String @unique
+  avatar String
+  createdAt DateTime @default(now())
+  lessons BarterLessonUser[] 
+}
+
+model Lesson {
+  id Int @id @default(autoincrement())
+  name String @unique
+  content String
+  photo String
+  createdAt DateTime @default(now())
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  localization Localization @relation(fields: [localizationId], references: [id])
+  localizationId Int
+  users BarterLessonUser[]
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String @unique
+  lesson Lesson[]
+}
+
+model Localization {
+  id Int @id @default(autoincrement())
+  city String 
+  street String
+  zip String
+  lesson Lesson[]
+}
+
+model BarterLessonUser {
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+  lessonId     Int 
+  user   User @relation(fields: [userId], references: [id])
+  userId Int 
+  assignedAt DateTime @default(now())
+  score String
+  @@id([lessonId, userId])
+}
+
+model LessonTest {
+  id Int @id @default(autoincrement())
+  title String @unique
+  offer String
+  instead String
+  tag String 
+  createdAt DateTime @default(now())
+}
+
+
+
