@@ -18,10 +18,13 @@ POST http://localhost:4000/api/lesson
 Content-Type: application/json
 
 {
-    "title": "tesgtdfdf",
-    "offer": "testgfdfsf",
-    "instead": "pafgssworfdsfd",
-    "tag": "emaifgfdsfl"
+    "name": "testttbgtdfd",
+    "content": "testgfdfsf",
+    "photo": "photo.jpg",
+    "video": "video.mpg",
+    "ownerId": 1,
+    "categoryId": 1,
+    "localizationId": 1,
 }
 
 
@@ -34,8 +37,8 @@ PATCH  http://localhost:4000/api/user/4
 Content-Type: application/json
 
 {
-   "firstName": "tesgtdfdf",
-    "lastName": "testgfdfsf",
+   "firstName": "tesgtdjkjkfdf",
+    "lastName": "testgfjkldfsf",
     "password": "pafgssworfdsfd",
     "email": "emaifgfdsfl",
     "avatar": "avgfadsftar.jpg" 
@@ -49,6 +52,19 @@ Content-Type: application/json
 {
     "name": "new",
     
+}
+
+###
+POST http://localhost:4000/api/user
+
+Content-Type: application/json
+
+{
+  "firstName": "user@user",
+  "lastName":  "user@user",
+  "password":  "user@user",
+  "email":     "user@user",  
+  "avatar":    "avatar.jpg",          
 }
 
 

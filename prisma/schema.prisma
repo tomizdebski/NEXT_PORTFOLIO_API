@@ -9,62 +9,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id Int @id @default(autoincrement())
+model Users {
+  id        Int                @id @default(autoincrement())
   firstName String
-  lastName String
-  password String 
-  email String @unique
-  avatar String
-  createdAt DateTime @default(now())
-  lessons BarterLessonUser[] 
+  lastName  String
+  password  String
+  email     String             @unique
+  avatar    String
+  role      Role               @default(USER)
+  createdAt DateTime           @default(now())
+  lessons   BarterLessons[]
+  lesson    Lessons[]
+  teachers  Teachers[]
+  students  Students[]
+
 }
 
-model Lesson {
-  id Int @id @default(autoincrement())
-  name String @unique
-  content String
-  photo String
-  createdAt DateTime @default(now())
-  category Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
-  localization Localization @relation(fields: [localizationId], references: [id])
+model Teachers {
+  id        Int                @id @default(autoincrement())
+  user          Users              @relation(fields: [userId], references: [id])
+  userId        Int
+  lesson     Lessons  @relation(fields: [lessonId], references: [id])
+  lessonId   Int
+}
+
+model Students {
+  id        Int                @id @default(autoincrement())
+  user          Users              @relation(fields: [userId], references: [id])
+  userId        Int
+  lesson     Lessons  @relation(fields: [lessonId], references: [id])
+  lessonId   Int
+}
+
+model Scores {
+  id        Int                @id @default(autoincrement())
+  value     Int
+  lesson     Lessons  @relation(fields: [lessonId], references: [id])
+  lessonId   Int
+}
+
+
+
+model Lessons {
+  id             Int                @id @default(autoincrement())
+  name           String             @unique
+  content        String
+  photo          String?
+  video          String?
+  createdAt      DateTime           @default(now())
+  owner          Users              @relation(fields: [ownerId], references: [id])
+  ownerId        Int
+  category       Categories         @relation(fields: [categoryId], references: [id])
+  categoryId     Int
+  localization   Localizations      @relation(fields: [localizationId], references: [id])
   localizationId Int
-  users BarterLessonUser[]
+  users          BarterLessons[]
+  teachers       Teachers[]
+  students       Students[]
+  scores         Scores[]
 }
 
-model Category {
-  id Int @id @default(autoincrement())
-  name String @unique
-  lesson Lesson[]
+model Categories {
+  id     Int       @id @default(autoincrement())
+  name   String    @unique
+  lesson Lessons[]
 }
 
-model Localization {
-  id Int @id @default(autoincrement())
-  city String 
-  street String
-  zip String
-  lesson Lesson[]
+model Localizations {
+  id       Int       @id @default(autoincrement())
+  city     String
+  street   String
+  zip      String
+  province String
+  lesson   Lessons[]
 }
 
-model BarterLessonUser {
-  lesson       Lesson     @relation(fields: [lessonId], references: [id])
-  lessonId     Int 
-  user   User @relation(fields: [userId], references: [id])
-  userId Int 
+model BarterLessons {
+  lesson     Lessons  @relation(fields: [lessonId], references: [id])
+  lessonId   Int
+  user       Users    @relation(fields: [userId], references: [id])
+  userId     Int
   assignedAt DateTime @default(now())
-  score String
+  score      String
   @@id([lessonId, userId])
 }
 
-model LessonTest {
-  id Int @id @default(autoincrement())
-  title String @unique
-  offer String
-  instead String
-  tag String 
-  createdAt DateTime @default(now())
+enum Role {
+  USER
+  ADMIN
 }
-
-
-

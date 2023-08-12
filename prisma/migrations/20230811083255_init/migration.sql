@@ -1,15 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Product` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "Product" DROP CONSTRAINT "Product_categoryId_fkey";
-
--- DropTable
-DROP TABLE "Product";
-
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -37,6 +25,14 @@ CREATE TABLE "Lesson" (
 );
 
 -- CreateTable
+CREATE TABLE "Category" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Localization" (
     "id" SERIAL NOT NULL,
     "city" TEXT NOT NULL,
@@ -56,8 +52,29 @@ CREATE TABLE "BarterLessonUser" (
     CONSTRAINT "BarterLessonUser_pkey" PRIMARY KEY ("lessonId","userId")
 );
 
+-- CreateTable
+CREATE TABLE "LessonTest" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "offer" TEXT NOT NULL,
+    "instead" TEXT NOT NULL,
+    "tag" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "LessonTest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Lesson_name_key" ON "Lesson"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "LessonTest_title_key" ON "LessonTest"("title");
 
 -- AddForeignKey
 ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
