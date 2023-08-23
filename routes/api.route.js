@@ -1,19 +1,64 @@
 const router = require("express").Router();
+const fs = require('fs');
 const { PrismaClient } = require("@prisma/client");
-
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 const prisma = new PrismaClient();
 
 router.get("/", async (req, res, next) => {
   res.send({ message: "Ok api is working 🚀" });
 });
 
+router.post("/login/", async (req, res, next) => {
+
+  console.log(req.body);
+  try {
+    //const {email, password} = req.body;
+    const user = await prisma.users.findUnique({
+      where: {
+        email: req.body.email,
+      }
+    });
+    
+    if(req.body.password === user.password){
+      res.json(user);
+    }
+    
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/register', async (req,res, next) => {
+//router.post('/register',async (req,res, next) => {
+
+  console.log(req.body)
+  if (req.file) console.log(req.file)
+
+  const {firstName,lastName,password,email,avatar} = req.body;
+
+  try{
+    const userDoc = await prisma.users.create({
+      data: {
+      firstName,
+      lastName,
+      password,
+      email,
+      avatar,
+    }});
+    res.json(userDoc);
+  } catch(error) {
+    next(error);
+  }
+});
+
 router.get("/users/", async (req, res, next) => {
   try {
     const users = await prisma.users.findMany({
       include: { 
-        lessons: true,
-        teachers: true,
-        students: true 
+        instructor: true,
+        student: true,
+        skills: {include: {skill: true}} 
       },
     });
 
@@ -63,7 +108,7 @@ router.patch("/user/:id", async (req, res, next) => {
   }
 });
 
-router.get("/categories/", async (req, res, next) => {
+router.get("/categories", async (req, res, next) => {
   try {
     const categories = await prisma.categories.findMany({
       include: { lesson: true },
@@ -89,7 +134,7 @@ router.get("/user/:id/lessons/", async (req, res, next) => {
     const {id} = req.params
     const lessons = await prisma.lessons.findMany({
       where:{
-        ownerId: +id
+        instructorId: +id,
       },
       include: {
         category: true,
@@ -125,9 +170,12 @@ router.get("/lessons/", async (req, res, next) => {
   try {
     const lessons = await prisma.lessons.findMany({
       include: {
+        instructor: true,
+        student: true,
         category: true,
         localization: true,
-        users: true,
+        scores: true
+        
       },
     });
     res.json(lessons);
@@ -156,7 +204,8 @@ router.get('/lesson/:id', async (req, res, next) => {
       },
       include: {
         category: true,
-        owner: true,
+        instructor: true,
+        student: true,
         localization: true,
   
       },
@@ -179,38 +228,5 @@ router.get("/localizations/", async (req, res, next) => {
     next(error);
   }
 });
-
-router.get("/teachers/", async (req, res, next) => {
-  try {
-    const teachers = await prisma.teachers.findMany({
-      include: {
-        lesson: true,
-        user: true
-      },
-    });
-    res.json(teachers);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/students/", async (req, res, next) => {
-  try {
-    const students = await prisma.students.findMany({
-      include: {
-        lesson: true,
-        user: true
-      },
-    });
-    res.json(students);
-  } catch (error) {
-    next(error);
-  }
-});
-
-
-
-
-
 
 module.exports = router;

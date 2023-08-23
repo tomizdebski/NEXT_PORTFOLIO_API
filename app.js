@@ -3,7 +3,6 @@ const createError = require('http-errors');
 const morgan = require('morgan');
 require('dotenv').config();
 const cors = require('cors');
-const {PrismaClient} = require('@prisma/client')
 const app = express();
 
 app.use(cors())
@@ -11,11 +10,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-
-const prisma = new PrismaClient();
-
 app.get('/', async (req, res, next) => {
   res.send({ message: 'Awesome it works 🐻' });
+
 });
 
 app.use('/api', require('./routes/api.route'));

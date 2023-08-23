@@ -10,71 +10,56 @@ datasource db {
 }
 
 model Users {
-  id        Int                @id @default(autoincrement())
-  firstName String
-  lastName  String
-  password  String
-  email     String             @unique
-  avatar    String
-  role      Role               @default(USER)
-  createdAt DateTime           @default(now())
-  lessons   BarterLessons[]
-  lesson    Lessons[]
-  teachers  Teachers[]
-  students  Students[]
-
+  id         Int           @id @default(autoincrement())
+  firstName  String        // @db.VarChar(255)
+  lastName   String
+  password   String
+  email      String        @unique
+  avatar     String?
+  role       Role          @default(USER)
+  createdAt  DateTime      @default(now())
+  instructor Lessons[]     @relation("instructor")
+  student    Lessons[]     @relation("student")
+  skills     UsersSkills[]
 }
 
-model Teachers {
-  id        Int                @id @default(autoincrement())
-  user          Users              @relation(fields: [userId], references: [id])
-  userId        Int
-  lesson     Lessons  @relation(fields: [lessonId], references: [id])
-  lessonId   Int
-}
-
-model Students {
-  id        Int                @id @default(autoincrement())
-  user          Users              @relation(fields: [userId], references: [id])
-  userId        Int
-  lesson     Lessons  @relation(fields: [lessonId], references: [id])
-  lessonId   Int
-}
-
+//ok//
 model Scores {
-  id        Int                @id @default(autoincrement())
-  value     Int
-  lesson     Lessons  @relation(fields: [lessonId], references: [id])
-  lessonId   Int
+  id       Int     @id @default(autoincrement())
+  value    Int
+  lesson   Lessons @relation(fields: [lessonId], references: [id])
+  lessonId Int
 }
 
-
-
+//ok//
 model Lessons {
-  id             Int                @id @default(autoincrement())
-  name           String             @unique
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
   content        String
   photo          String?
   video          String?
-  createdAt      DateTime           @default(now())
-  owner          Users              @relation(fields: [ownerId], references: [id])
-  ownerId        Int
-  category       Categories         @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime        @default(now())
+  instructor     Users           @relation("instructor", fields: [instructorId], references: [id]) 
+  instructorId   Int             
+  student        Users?           @relation("student", fields: [studentId], references: [id])
+  studentId      Int?
+  category       Categories      @relation(fields: [categoryId], references: [id])
   categoryId     Int
-  localization   Localizations      @relation(fields: [localizationId], references: [id])
-  localizationId Int
-  users          BarterLessons[]
-  teachers       Teachers[]
-  students       Students[]
+  localization   Localizations?   @relation(fields: [localizationId], references: [id])
+  localizationId Int?
   scores         Scores[]
+  barterLesson   BarterLessons[] @relation("lesson")
+  barterlessonEx BarterLessons[] @relation("lessonEx")
 }
 
+//ok//
 model Categories {
   id     Int       @id @default(autoincrement())
   name   String    @unique
   lesson Lessons[]
 }
 
+//ok//
 model Localizations {
   id       Int       @id @default(autoincrement())
   city     String
@@ -84,16 +69,31 @@ model Localizations {
   lesson   Lessons[]
 }
 
+//ok//
 model BarterLessons {
-  lesson     Lessons  @relation(fields: [lessonId], references: [id])
+  id         Int     @id @default(autoincrement())
+  lesson     Lessons @relation("lesson", fields: [lessonId], references: [id])
   lessonId   Int
-  user       Users    @relation(fields: [userId], references: [id])
-  userId     Int
-  assignedAt DateTime @default(now())
-  score      String
-  @@id([lessonId, userId])
+  lessonEx   Lessons @relation("lessonEx", fields: [lessonExId], references: [id])
+  lessonExId Int
 }
 
+model UsersSkills {
+  user    Users  @relation(fields: [userId], references: [id])
+  userId  Int
+  skill   Skills @relation(fields: [skillId], references: [id])
+  skillId Int
+  @@id([userId, skillId])
+}
+
+model Skills {
+  id    Int           @id @default(autoincrement())
+  name  String
+  level Int
+  user  UsersSkills[]
+}
+
+//ok//
 enum Role {
   USER
   ADMIN
