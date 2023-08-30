@@ -9,6 +9,9 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads'));
+
+
 
 app.get('/', async (req, res, next) => {
   res.send({ message: 'Awesome it works 🐻' });
