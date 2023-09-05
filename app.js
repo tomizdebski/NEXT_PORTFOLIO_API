@@ -11,6 +11,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
 
+/////socket
+const http = require('http').Server(app);
+const socketIO = require('socket.io')(http, {
+  cors: {
+      origin: "http://localhost:3000"
+  }
+});
+
+socketIO.on('connection', (socket) => {
+  console.log(`⚡: ${socket.id} user just connected!`)  
+
+});
+//socket
+
 
 
 app.get('/', async (req, res, next) => {

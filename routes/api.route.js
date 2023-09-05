@@ -1,10 +1,13 @@
 const router = require("express").Router();
-require('../lib/lib');
+require("../lib/lib");
+const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
 const { saveFile } = require("../lib/lib");
 const upload = multer({ dest: "uploads/" });
+const salt = bcrypt.genSaltSync(10);
+
 const prisma = new PrismaClient();
 
 router.get("/", async (req, res, next) => {
@@ -14,14 +17,16 @@ router.get("/", async (req, res, next) => {
 router.post("/login/", async (req, res, next) => {
   console.log(req.body);
   try {
-    //const {email, password} = req.body;
+    const { email, password } = req.body;
+
     const user = await prisma.users.findUnique({
       where: {
-        email: req.body.email,
+        email: email,
       },
     });
 
-    if (req.body.password === user.password) {
+    const passOk = bcrypt.compareSync(password, user.password);
+    if (passOk) {
       res.json(user);
     }
   } catch (error) {
@@ -36,14 +41,14 @@ router.post("/register", upload.single("avatar"), async (req, res, next) => {
   try {
     const { originalname, path } = req.file;
     const { firstName, lastName, password, email } = req.body;
-   
+
     const newPathAvatar = saveFile(originalname, path);
 
     const userDoc = await prisma.users.create({
       data: {
         firstName,
         lastName,
-        password,
+        password: bcrypt.hashSync(password, salt),
         email,
         avatar: newPathAvatar,
       },
@@ -188,7 +193,6 @@ router.post("/lesson", cpUpload, async (req, res, next) => {
   try {
     const photo = req.files["photo"][0];
     const video = req.files["video"][0];
-    
 
     const { name, content, instructorId, categoryId, localizationId } =
       req.body;
@@ -203,7 +207,7 @@ router.post("/lesson", cpUpload, async (req, res, next) => {
         instructorId: +instructorId,
         categoryId: +categoryId,
         localizationId: +localizationId,
-        photo: newPathPhoto ,
+        photo: newPathPhoto,
         video: newPathVideo,
       },
     });
@@ -233,6 +237,24 @@ router.get("/lesson/:id", async (req, res, next) => {
   }
 });
 
+router.patch("/lesson/:id", async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const { id } = req.params;
+    //delete req.body.id
+    const lessonUpdate = await prisma.lessons.update({
+      where: {
+        id: +id,
+      },
+      data: req.body,
+    });
+    res.json(lessonUpdate);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 router.get("/localizations/", async (req, res, next) => {
   try {
     const localizations = await prisma.localizations.findMany({
@@ -241,6 +263,97 @@ router.get("/localizations/", async (req, res, next) => {
       },
     });
     res.json(localizations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/barter-lessons/", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { lessonId, lessonExId } = req.body;
+    const barterAdd = await prisma.barterLessons.create({
+      data: {
+        lessonId: +lessonId,
+        lessonExId: +lessonExId,
+      },
+    });
+    const userUpdate = await prisma.users.update({
+      where: {
+        id: +id,
+      },
+      data: req.body,
+    });
+    res.json(barterAdd);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/barter-lessons/:id", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { lessonId, lessonExId } = req.body;
+    const barterAdd = await prisma.barterLessons.create({
+      data: {
+        lessonId: +lessonId,
+        lessonExId: +lessonExId,
+      },
+    });
+    res.json(barterAdd);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/barter-lessons/", async (req, res, next) => {
+  try {
+    const barterLesson = await prisma.barterLessons.findMany({
+      include: {
+        lesson: true,
+        lessonEx: true,
+      },
+    });
+    res.json(barterLesson);
+  } catch (error) {
+    next(error);
+  }
+});
+
+//nie działa
+router.delete("/barter-lessons/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deleteLesson = await prisma.barterLessons.delete({
+      where: {
+        id: +id,
+      },
+    });
+    res.json(deleteLesson);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/skills/", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { name, level, userId } = req.body;
+    const skillsAdd = await prisma.skills.create({
+      data: {
+        name: name,
+        level: level,
+      },
+    });
+    console.log(skillsAdd.id)
+    const userUpdate = await prisma.usersSkills.create({
+      data: {
+        userId: +userId,
+        skillId: +skillsAdd.id,
+      },
+    });
+
+    res.json(skillsAdd);
   } catch (error) {
     next(error);
   }
