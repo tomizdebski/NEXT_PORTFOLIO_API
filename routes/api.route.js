@@ -7,7 +7,7 @@ const multer = require("multer");
 const { saveFile } = require("../lib/lib");
 const upload = multer({ dest: "uploads/" });
 const salt = bcrypt.genSaltSync(10);
-
+const nodemailer = require("nodemailer");
 const prisma = new PrismaClient();
 
 router.get("/", async (req, res, next) => {
@@ -271,19 +271,60 @@ router.get("/localizations/", async (req, res, next) => {
 router.post("/barter-lessons/", async (req, res, next) => {
   try {
     console.log(req.body);
-    const { lessonId, lessonExId } = req.body;
+    const { lessonId, lessonExId, emailI, emailS } = req.body;
     const barterAdd = await prisma.barterLessons.create({
       data: {
         lessonId: +lessonId,
         lessonExId: +lessonExId,
       },
     });
-    const userUpdate = await prisma.users.update({
-      where: {
-        id: +id,
+
+    // const userUpdate = await prisma.users.update({
+    //   where: {
+    //     id: +id,
+    //   },
+    //   data: req.body,
+    // });
+
+    const config = {
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "tomizdebski@gmail.com",
+        pass: "lgfladobyxjptqyy",
       },
-      data: req.body,
-    });
+    };
+
+    const send = (data) => {
+      const transporter = nodemailer.createTransport(config);
+      transporter.sendMail(data, (err, info) => {
+        if (err) {
+          console.log(err);
+        } else {
+          return info.response;
+        }
+      });
+    };
+
+    const data = {
+      from: emailI,
+      to: emailS,
+      subject: "Barter",
+      text: "Wasze bartery są w realizacji",
+    };
+
+    const data1 = {
+      from: emailS,
+      to: emailI,
+      subject: "Barter",
+      text: "Wasze bartery są w realizacji",
+    };
+
+    send(data);
+    send(data1);
+
     res.json(barterAdd);
   } catch (error) {
     next(error);
@@ -345,7 +386,7 @@ router.post("/skills/", async (req, res, next) => {
         level: level,
       },
     });
-    console.log(skillsAdd.id)
+    console.log(skillsAdd.id);
     const userUpdate = await prisma.usersSkills.create({
       data: {
         userId: +userId,
@@ -354,6 +395,21 @@ router.post("/skills/", async (req, res, next) => {
     });
 
     res.json(skillsAdd);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/skills/:idUser", async (req, res, next) => {
+  try {
+    const { idUser } = req.params;
+    const usersSkills = await prisma.usersSkills.findMany({
+      include: {
+        user: true,
+        skill: true,
+      },
+    });
+    res.json(usersSkills);
   } catch (error) {
     next(error);
   }
