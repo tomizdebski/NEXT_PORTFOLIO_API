@@ -359,4 +359,21 @@ router.post("/skills/", async (req, res, next) => {
   }
 });
 
+router.get("/skills/:idUser", async (req, res, next) => {
+  
+  try {
+    const { idUser } = req.params;
+    const usersSkills = await prisma.usersSkills.findMany({
+      
+      include: {
+        user: true,
+        skill: true,
+      },
+    });
+    res.json(usersSkills);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
