@@ -272,6 +272,9 @@ router.post("/barter-lessons/", async (req, res, next) => {
   try {
     console.log(req.body);
     const { lessonId, lessonExId, emailI, emailS } = req.body;
+
+    
+
     const barterAdd = await prisma.barterLessons.create({
       data: {
         lessonId: +lessonId,
@@ -279,12 +282,7 @@ router.post("/barter-lessons/", async (req, res, next) => {
       },
     });
 
-    // const userUpdate = await prisma.users.update({
-    //   where: {
-    //     id: +id,
-    //   },
-    //   data: req.body,
-    // });
+    
 
     const config = {
       service: "gmail",
@@ -292,8 +290,8 @@ router.post("/barter-lessons/", async (req, res, next) => {
       port: 587,
       secure: false,
       auth: {
-        user: "tomizdebski@gmail.com",
-        pass: "lgfladobyxjptqyy",
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     };
 
@@ -325,7 +323,7 @@ router.post("/barter-lessons/", async (req, res, next) => {
     send(data);
     send(data1);
 
-    res.json(barterAdd);
+    res.json("zapisano do bazy i wysłano maile");
   } catch (error) {
     next(error);
   }
@@ -335,6 +333,7 @@ router.post("/barter-lessons/:id", async (req, res, next) => {
   try {
     console.log(req.body);
     const { lessonId, lessonExId } = req.body;
+
     const barterAdd = await prisma.barterLessons.create({
       data: {
         lessonId: +lessonId,
