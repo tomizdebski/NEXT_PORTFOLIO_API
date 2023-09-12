@@ -1,5 +1,6 @@
 const router = require("express").Router();
 require("../lib/lib");
+const { loginSchema, registrationSchema } = require("../validation/validation");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
@@ -8,14 +9,24 @@ const { saveFile } = require("../lib/lib");
 const upload = multer({ dest: "uploads/" });
 const salt = bcrypt.genSaltSync(10);
 const nodemailer = require("nodemailer");
+const {body, checkSchema, validationResult} = require('express-validator');
 const prisma = new PrismaClient();
 
 router.get("/", async (req, res, next) => {
   res.send({ message: "Ok api is working 🚀" });
 });
 
-router.post("/login/", async (req, res, next) => {
-  console.log(req.body);
+router.post("/login/", checkSchema(loginSchema), async (req, res, next) => {
+ 
+
+  const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
   try {
     const { email, password } = req.body;
 
@@ -34,9 +45,15 @@ router.post("/login/", async (req, res, next) => {
   }
 });
 
-router.post("/register", upload.single("avatar"), async (req, res, next) => {
-  console.log(req.body);
-  console.log(req.file);
+router.post("/register", checkSchema(registrationSchema), upload.single("avatar"), async (req, res, next) => {
+  
+  // const errors = validationResult(req);
+
+  //   if (!errors.isEmpty()) {
+  //       return res.status(400).json({
+  //           errors: errors.array()
+  //       });
+  //   }
 
   try {
     const { originalname, path } = req.file;
