@@ -11,6 +11,7 @@ Project is created with:
 * Express
 * Prisma
 * Postgres
+* Docker
 
 
 ![](/images/database.png)
