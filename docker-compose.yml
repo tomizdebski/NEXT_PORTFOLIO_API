@@ -1,11 +1,53 @@
-version: '3.8'
+version: '3.9'
+
 services:
-  dev-db:
+
+  node_app:
+    container_name: node_barter_app
+    build: .
+    image: izdebski/barter_live_app
+    ports:
+      - 4000:4000
+    environment:
+      CORS_ACCEPTED: http://localhost:3000
+      DATABASE_URL: postgresql://user:password@node_db:5432/postgres?schema=public
+      EMAIL_SERVICE: gmail
+      EMAIL_USER: barteraplication@gmail.com
+      EMAIL_PASS: obmolulnnwkevidj
+    depends_on:
+      - node_db
+
+  node_db:
     image: postgres:13
-    container_name: barter_db
+    container_name: barter_db_app
     ports:
       - 5432:5432
+    expose:
+      - 5432
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
+      
+    volumes:
+    - node_db_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    depends_on:
+      - node_db
+    ports:
+      - 5555:80
+    expose:
+      - 5555
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  node_db_data: {}
+  pgadmin-data:

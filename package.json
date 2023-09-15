@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "prisma": "npx prisma migrate dev"
+
   },
   "engines": {
     "node": ">=16.13"
